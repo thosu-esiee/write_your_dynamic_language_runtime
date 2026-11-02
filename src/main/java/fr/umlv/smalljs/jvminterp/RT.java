@@ -66,13 +66,64 @@ public final class RT {
     return new ConstantCallSite(mh);
   }
 
+//  public static CallSite bsm_funcall(Lookup lookup, String name, MethodType type) {
+//    // get INVOKE method handle
+//    var mh = INVOKE;
+//    // make it accept an Object (not a JSObject) and objects as other parameters
+//    mh = mh.asType(type);
+//    // create a constant callsite
+//    return new ConstantCallSite(mh);
+//  }
+
   public static CallSite bsm_funcall(Lookup lookup, String name, MethodType type) {
-    // get INVOKE method handle
-    var mh = INVOKE;
-    // make it accept an Object (not a JSObject) and objects as other parameters
-    mh = mh.asType(type);
-    // create a constant callsite
-    return new ConstantCallSite(mh);
+    return new InliningCache(type);
+  }
+
+  private static final class InliningCache extends MutableCallSite {
+    private static final MethodHandle SLOW_PATH, POINTER_CHECK;
+    static {
+      var lookup = MethodHandles.lookup();
+      try {
+        SLOW_PATH = lookup.findVirtual(InliningCache.class, "slowPath", methodType(MethodHandle.class, Object.class, Object.class));
+        POINTER_CHECK = lookup.findStatic(InliningCache.class, "pointerCheck", methodType(boolean.class, Object.class, Object.class));
+      } catch (NoSuchMethodException | IllegalAccessException e) {
+        throw new AssertionError(e);
+      }
+    }
+
+    public InliningCache(MethodType type) {
+      super(type);
+      setTarget(MethodHandles.foldArguments(MethodHandles.exactInvoker(type), SLOW_PATH.bindTo(this)));
+    }
+
+    private static boolean pointerCheck(Object o1, Object o2) {
+      return o1 == o2;
+    }
+
+    private MethodHandle slowPath(Object qualifier, Object receiver) {
+      var jsObject = (JSObject) qualifier;
+      var mh = jsObject.methodHandle();
+      var isVarargs = mh.isVarargsCollector();
+
+      if (!mh.isVarargsCollector() && type().parameterCount() - 2 != mh.type().parameterCount() - 1) {
+        throw new Failure("arguments doesn't match parameters count " + (type().parameterCount() - 2) + " " + (mh.type().parameterCount() - 1));
+      }
+
+      mh = MethodHandles.dropArguments(mh, 0, Object.class)
+              .withVarargs(isVarargs);
+      var target = mh.asType(type());
+
+      var test = POINTER_CHECK.bindTo(jsObject);
+//      test = MethodHandles.insertArguments(test, 1, jsObject); // Same as `POINTER_CHECK.bindTo(jsObject)`
+      var fallback = getTarget();
+      var guard = MethodHandles.guardWithTest(test, target, fallback);
+      setTarget(guard);
+
+      // atm : if b -> if a -> ...
+      // todo : if a -> if b -> ... (1 line of code)
+
+      return target;
+    }
   }
 
   public static CallSite bsm_globalcall(Lookup lookup, String name, MethodType type, String variableName) {

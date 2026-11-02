@@ -302,12 +302,11 @@ public class JVMInterpreterTests {
     }
   }
 
-  /*
   @Nested
   public class Q12 {
     @Test
     public void callFibo() {
-      assertEquals("21\n", execute("""
+      assertEquals("10946\n", execute("""
               function fibo(n) {
                   if (n < 2) {
                     return 1
@@ -316,7 +315,7 @@ public class JVMInterpreterTests {
                   }
                 }
 
-              print(fibo(7))
+              print(fibo(20))
               """));
     }
 
@@ -364,6 +363,7 @@ public class JVMInterpreterTests {
     }
   }
 
+  /*
   @Nested
   public class Q13 {
     @Test
