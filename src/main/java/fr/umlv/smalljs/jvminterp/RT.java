@@ -56,19 +56,23 @@ public final class RT {
   }
 
   public static CallSite bsm_lookup(Lookup lookup, String name, MethodType type, String variableName) {
-    throw new UnsupportedOperationException("TODO bsm_lookup");
-    //var classLoader = (FunClassLoader) lookup.lookupClass().getClassLoader();
-    //var globalEnv = classLoader.global();
+    var classLoader = (FunClassLoader) lookup.lookupClass().getClassLoader();
+    var globalEnv = classLoader.global();
     // get the LOOKUP_OR_FAIL method handle
+    var mh = LOOKUP_OR_FAIL;
     // use the global environment as first argument and the variableName as second argument
+    mh = MethodHandles.insertArguments(mh, 0, globalEnv, variableName);
     // create a constant callsite
+    return new ConstantCallSite(mh);
   }
 
   public static CallSite bsm_funcall(Lookup lookup, String name, MethodType type) {
-    throw new UnsupportedOperationException("TODO bsm_funcall");
     // get INVOKE method handle
+    var mh = INVOKE;
     // make it accept an Object (not a JSObject) and objects as other parameters
+    mh = mh.asType(type);
     // create a constant callsite
+    return new ConstantCallSite(mh);
   }
 
   public static CallSite bsm_globalcall(Lookup lookup, String name, MethodType type, String variableName) {

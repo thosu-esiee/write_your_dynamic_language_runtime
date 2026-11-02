@@ -22,7 +22,6 @@ public class ASTInterpreterTests {
   }
 
   @Nested
-  @Disabled("Q2")
   public class Q2 {
     @Test
     public void helloDoubleQuotedString() {
@@ -49,7 +48,6 @@ public class ASTInterpreterTests {
   }
 
   @Nested
-  @Disabled("Q3")
   public class Q3 {
     @Test
     public void integer3() {
@@ -69,7 +67,6 @@ public class ASTInterpreterTests {
   }
 
   @Nested
-  @Disabled("Q4")
   public class Q4 {
     @Test
     public void print() {
@@ -99,7 +96,6 @@ public class ASTInterpreterTests {
   }
 
   @Nested
-  @Disabled("Q5")
   public class Q5 {
     @Test
     public void printPrint() {
@@ -109,7 +105,6 @@ public class ASTInterpreterTests {
   }
 
   @Nested
-  @Disabled("Q6")
   public class Q6 {
     @Test
     public void printOperations() {
@@ -145,7 +140,6 @@ public class ASTInterpreterTests {
 
 
   @Nested
-  @Disabled("Q7")
   public class Q7 {
     @Test
     public void printPrint3() {
@@ -165,7 +159,6 @@ public class ASTInterpreterTests {
 
 
   @Nested
-  @Disabled("Q8")
   public class Q8 {
     @Test
     public void printAVariable() {
@@ -238,7 +231,6 @@ public class ASTInterpreterTests {
 
 
   @Nested
-  @Disabled("Q9")
   public class Q9 {
     @Test
     public void printAVariableDefinedAfter() {
@@ -266,7 +258,6 @@ public class ASTInterpreterTests {
 
 
   @Nested
-  @Disabled("Q10")
   public class Q10 {
     @Test
     public void callAUserDefinedFunctionAndPrint() {
@@ -391,7 +382,6 @@ public class ASTInterpreterTests {
 
 
   @Nested
-  @Disabled("Q11")
   public class Q11 {
     @Test
     public void printWithAnIf() {
@@ -485,7 +475,6 @@ public class ASTInterpreterTests {
 
 
   @Nested
-  @Disabled("Q12")
   public class Q12 {
     @Test
     public void callFibo() {
@@ -585,7 +574,6 @@ public class ASTInterpreterTests {
 
 
   @Nested
-  @Disabled("Q13")
   public class Q13 {
     @Test
     public void createAnObject() {
@@ -651,7 +639,6 @@ public class ASTInterpreterTests {
 
 
   @Nested
-  @Disabled("Q14")
   public class Q14 {
     @Test
     public void createAnObjectFromAVariableValue() {
@@ -705,7 +692,6 @@ public class ASTInterpreterTests {
 
 
   @Nested
-  @Disabled("Q15")
   public class Q15 {
     @Test
     public void readAField() {
@@ -806,7 +792,6 @@ public class ASTInterpreterTests {
   }
 
   @Nested
-  @Disabled("Q16")
   public class Q16 {
     @Test
     public void objectUpdateAFieldValue() {
@@ -889,7 +874,6 @@ public class ASTInterpreterTests {
 
 
   @Nested
-  @Disabled("Q17")
   public class Q17 {
     @Test
     public void objectCallAMethod() {

@@ -19,11 +19,7 @@ import java.lang.invoke.MethodType;
 import java.util.List;
 import java.util.Map;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.ConstantDynamic;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.*;
 import org.objectweb.asm.util.CheckClassAdapter;
 
 import fr.umlv.smalljs.ast.Expr;
@@ -143,30 +139,44 @@ public final class ByteCodeRewriter {
   private static void visit(Expr expression, JSObject env, MethodVisitor mv, FunDictionary dictionary) {
     switch(expression) {
       case Block(List<Expr> exprs, int lineNumber) -> {
-        throw new UnsupportedOperationException("TODO Block");
         // for each expression
-        // generate the line number
-        // visit it
-        // if not a statement, generate a POP
+        for (var expr : exprs) {
+          // generate the line number
+          var label = new Label();
+          mv.visitLabel(label);
+          mv.visitLineNumber(expr.lineNumber(), label);
+          // visit it
+          visit(expr, env, mv, dictionary);
+          // if not a statement, generate a POP
+          if (!(expr instanceof Expr.Statement)) {
+            mv.visitInsn(Opcodes.POP);
+          }
+        }
       }
       case Literal(Integer integer, int lineNumber) -> {
-        throw new UnsupportedOperationException("TODO Literal Integer");
-        // use visitLDCInstr with a ConstantDynamic because the JVM does not support Integer (but supports int)
+        // use visitLdcInst with a ConstantDynamic because the JVM does not support Integer (but supports int)
+        mv.visitLdcInsn(new ConstantDynamic("integer", "Ljava/lang/Integer;", BSM_CONST, integer));
       }
       case Literal(String s, int lineNumber) -> {
-        throw new UnsupportedOperationException("TODO Literal String");
-        // use visitLDCInstr because the JVM natively supports strings
+        // use visitLdcInst because the JVM natively supports strings
+        mv.visitLdcInsn(s);
       }
       case Literal _ -> {  // should be UNDEFINED
-        throw new UnsupportedOperationException("TODO Literal UNDEFINED");
         // use visitLDCInstr with a ConstantDynamic because the JVM does not support UNDEFINED natively
+        mv.visitLdcInsn(new ConstantDynamic("undefined", "Ljava/lang/Object;", BSM_UNDEFINED));
       }
       case Call(Expr qualifier, List<Expr> args, int lineNumber) -> {
-        throw new UnsupportedOperationException("TODO Call");
         // visit the qualifier
+        visit(qualifier, env, mv, dictionary);
         // load "this"
+        mv.visitLdcInsn(new ConstantDynamic("undefined", "Ljava/lang/Object;", BSM_UNDEFINED));
         // for each argument, visit it
+        for (var arg : args) {
+          visit(arg, env, mv, dictionary);
+        }
         // generate an invokedynamic
+        var desc = "(" + "Ljava/lang/Object;".repeat(args.size() + 2) + ")Ljava/lang/Object;";
+        mv.visitInvokeDynamicInsn("undefined", desc, BSM_FUNCALL);
       }
       case VarAssignment(String name, Expr expr, boolean declaration, int lineNumber) -> {
         throw new UnsupportedOperationException("TODO VarAssignment");
@@ -176,12 +186,17 @@ public final class ByteCodeRewriter {
         // otherwise STORE the top of the stack at the local variable slot
       }
       case Identifier(String name, int lineNumber) -> {
-        throw new UnsupportedOperationException("TODO Identifier");
         // lookup to find if it's a local var access or a lookup access
+        var slot = env.lookupOrDefault(name, null);
         // if it does not exist
-        //  generate an invokedynamic doing a lookup
-        // otherwise
-        //  load the local variable at the slot
+        if (slot == null) {
+          //  generate an invokedynamic doing a lookup
+          mv.visitInvokeDynamicInsn("lookup", "()Ljava/lang/Object;", BSM_LOOKUP, name);
+        } else {
+          // otherwise
+          //  load the local variable at the slot
+          mv.visitVarInsn(Opcodes.ALOAD, (int) slot);
+        }
       }
       case Fun fun -> {
         var name = fun.name();

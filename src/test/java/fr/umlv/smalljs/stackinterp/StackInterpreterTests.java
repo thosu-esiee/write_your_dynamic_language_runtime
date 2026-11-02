@@ -23,7 +23,6 @@ public class StackInterpreterTests {
   }
 
   @Nested
-  @Disabled("Q2")
   public class Q2 {
     @Test
     public void helloDoubleQuotedString() {
@@ -50,7 +49,6 @@ public class StackInterpreterTests {
   }
 
   @Nested
-  @Disabled("Q3")
   public class Q3 {
     @Test
     public void integer3() {
@@ -70,7 +68,6 @@ public class StackInterpreterTests {
   }
 
   @Nested
-  @Disabled("Q4")
   public class Q4 {
     @Test
     public void print() {
@@ -100,7 +97,6 @@ public class StackInterpreterTests {
   }
 
   @Nested
-  @Disabled("Q5")
   public class Q5 {
     @Test
     public void printPrint() {
@@ -110,7 +106,6 @@ public class StackInterpreterTests {
   }
 
   @Nested
-  @Disabled("Q6")
   public class Q6 {
     @Test
     public void printOperations() {
@@ -144,9 +139,7 @@ public class StackInterpreterTests {
     }
   }
 
-
   @Nested
-  @Disabled("Q7")
   public class Q7 {
     @Test
     public void printPrint3() {
@@ -164,9 +157,7 @@ public class StackInterpreterTests {
     }
   }
 
-
   @Nested
-  @Disabled("Q8")
   public class Q8 {
     @Test
     public void printAVariable() {
@@ -237,9 +228,7 @@ public class StackInterpreterTests {
     }
   }
 
-
   @Nested
-  @Disabled("Q9")
   public class Q9 {
     @Test
     public void printAVariableDefinedAfter() {
@@ -265,9 +254,7 @@ public class StackInterpreterTests {
     }
   }
 
-
   @Nested
-  @Disabled("Q10")
   public class Q10 {
     @Test
     public void callAUserDefinedFunctionAndPrint() {
@@ -378,9 +365,7 @@ public class StackInterpreterTests {
     }
   }
 
-
   @Nested
-  @Disabled("Q11")
   public class Q11 {
     @Test
     public void printWithAnIf() {
@@ -472,9 +457,7 @@ public class StackInterpreterTests {
     }
   }
 
-
   @Nested
-  @Disabled("Q12")
   public class Q12 {
     @Test
     public void callFibo() {
@@ -549,9 +532,7 @@ public class StackInterpreterTests {
     }
   }
 
-
   @Nested
-  @Disabled("Q13")
   public class Q13 {
     @Test
     public void createAnObject() {
@@ -615,7 +596,6 @@ public class StackInterpreterTests {
     }
   }
 
-
   @Nested
   @Disabled("Q14")
   public class Q14 {
@@ -668,7 +648,6 @@ public class StackInterpreterTests {
                   """));
     }
   }
-
 
   @Nested
   @Disabled("Q15")
@@ -774,7 +753,6 @@ public class StackInterpreterTests {
               """));
     }
   }
-
 
   @Nested
   @Disabled("Q17")
