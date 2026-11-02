@@ -83,20 +83,24 @@ public final class RT {
   }
 
   public static Object bsm_fun(Lookup lookup, String name, Class<?> type, int funId) {
-    throw new UnsupportedOperationException("TODO bsm_fun");
-    //var classLoader = (FunClassLoader) lookup.lookupClass().getClassLoader();
-    //var globalEnv = classLoader.global();
+    var classLoader = (FunClassLoader) lookup.lookupClass().getClassLoader();
+    var globalEnv = classLoader.global();
     // get the dictionary and get the Fun object corresponding to the id
+    var dictionary = classLoader.dictionary();
+    var fun = dictionary.lookupAndClear(funId);
     // create the function using ByteCodeRewriter.createFunction(...)
+    return ByteCodeRewriter.createFunction(name, fun.parameters(), fun.body(), globalEnv);
   }
 
   public static CallSite bsm_register(Lookup lookup, String name, MethodType type, String functionName) {
-    throw new UnsupportedOperationException("TODO bsm_register");
-    //var classLoader = (FunClassLoader) lookup.lookupClass().getClassLoader();
-    //var globalEnv = classLoader.global();
-    //get the REGISTER method handle
+    var classLoader = (FunClassLoader) lookup.lookupClass().getClassLoader();
+    var globalEnv = classLoader.global();
+    // get the REGISTER method handle
+    var mh = REGISTER;
     // use the global environment as first argument and the functionName as second argument
+    var target = MethodHandles.insertArguments(mh, 0, globalEnv, functionName);
     // create a constant callsite
+    return new ConstantCallSite(target);
   }
 
   @SuppressWarnings("unused")  // used by a method handle
@@ -104,9 +108,10 @@ public final class RT {
     return o != null && o != UNDEFINED && o != Boolean.FALSE;
   }
   public static CallSite bsm_truth(Lookup lookup, String name, MethodType type) {
-    throw new UnsupportedOperationException("TODO bsm_truth");
     // get the TRUTH method handle
+    var mh = TRUTH;
     // create a constant callsite
+    return new ConstantCallSite(mh);
   }
 
   public static CallSite bsm_get(Lookup lookup, String name, MethodType type, String fieldName) {

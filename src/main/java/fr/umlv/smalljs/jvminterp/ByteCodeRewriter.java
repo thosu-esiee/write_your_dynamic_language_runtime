@@ -2,13 +2,7 @@ package fr.umlv.smalljs.jvminterp;
 
 import static java.lang.invoke.MethodType.genericMethodType;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
-import static org.objectweb.asm.Opcodes.ACC_SUPER;
-import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.V25;
+import static org.objectweb.asm.Opcodes.*;
 
 import java.io.PrintWriter;
 import java.lang.invoke.CallSite;
@@ -19,6 +13,7 @@ import java.lang.invoke.MethodType;
 import java.util.List;
 import java.util.Map;
 
+import fr.umlv.smalljs.rt.Failure;
 import org.objectweb.asm.*;
 import org.objectweb.asm.util.CheckClassAdapter;
 
@@ -179,11 +174,16 @@ public final class ByteCodeRewriter {
         mv.visitInvokeDynamicInsn("undefined", desc, BSM_FUNCALL);
       }
       case VarAssignment(String name, Expr expr, boolean declaration, int lineNumber) -> {
-        throw new UnsupportedOperationException("TODO VarAssignment");
         // visit the expression
+        visit(expr, env, mv, dictionary);
         // lookup that name in the environment
+        var slot = env.lookupOrDefault(name, null);
         // if it does not exist throw a Failure
+        if (slot == null) {
+          throw new Failure("no " + name + " found in env");
+        }
         // otherwise STORE the top of the stack at the local variable slot
+        mv.visitVarInsn(ASTORE, (int) slot);
       }
       case Identifier(String name, int lineNumber) -> {
         // lookup to find if it's a local var access or a lookup access
@@ -195,28 +195,43 @@ public final class ByteCodeRewriter {
         } else {
           // otherwise
           //  load the local variable at the slot
-          mv.visitVarInsn(Opcodes.ALOAD, (int) slot);
+          mv.visitVarInsn(ALOAD, (int) slot);
         }
       }
       case Fun fun -> {
         var name = fun.name();
         var toplevel = fun.toplevel();
-        throw new UnsupportedOperationException("TODO Fun");
         // register the fun inside the fun directory and get the corresponding id
+        var funIdx = dictionary.register(fun);
         // emit a LDC to load the function corresponding to the id at runtime
+        mv.visitLdcInsn(new ConstantDynamic(name, "Ljava/lang/Object;", BSM_FUN, funIdx));
         // generate an invokedynamic doing a register with the function name if it's a toplevel
+        if (toplevel) {
+          mv.visitInsn(DUP);
+          mv.visitInvokeDynamicInsn("register", "(Ljava/lang/Object;)V", BSM_REGISTER, name);
+        }
       }
       case Return(Expr expr, int lineNumber) -> {
-        throw new UnsupportedOperationException("TODO Return");
         // visit the return expression
+        visit(expr, env, mv, dictionary);
         // generate the bytecode
+        mv.visitInsn(ARETURN);
       }
       case If(Expr condition, Block trueBlock, Block falseBlock, int lineNumber) -> {
-        throw new UnsupportedOperationException("TODO If");
         // visit the condition
+        visit(condition, env, mv, dictionary);
         // generate an invokedynamic to transform an Object to a boolean using BSM_TRUTH
+        mv.visitInvokeDynamicInsn("truthitude ou troussitude", "(Ljava/lang/Object;)Z", BSM_TRUTH);
+        var startOfFalseBlockLabel = new Label();
+        mv.visitJumpInsn(IFEQ, startOfFalseBlockLabel);
         // visit the true block
+        visit(trueBlock, env, mv,dictionary);
+        var endOfFalseBlockLabel = new Label();
+        mv.visitJumpInsn(GOTO, endOfFalseBlockLabel);
         // visit the false block
+        mv.visitLabel(startOfFalseBlockLabel);
+        visit(falseBlock, env, mv, dictionary);
+        mv.visitLabel(endOfFalseBlockLabel);
       }
       case ObjectLiteral(Map<String, Expr> initMap, int lineNumber) -> {
         throw new UnsupportedOperationException("TODO ObjectLiteral");

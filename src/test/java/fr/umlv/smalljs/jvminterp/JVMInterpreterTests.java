@@ -58,7 +58,6 @@ public class JVMInterpreterTests {
     }
   }
 
-  /*
   @Nested
   public class Q5 {
     @Test
@@ -303,6 +302,7 @@ public class JVMInterpreterTests {
     }
   }
 
+  /*
   @Nested
   public class Q12 {
     @Test
